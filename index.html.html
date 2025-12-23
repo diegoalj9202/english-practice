@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Shadowing Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 2px solid #2563EB; color: #2563EB; font-weight: 600; }
+        .tab-inactive { color: #6B7280; }
+        .tab-inactive:hover { color: #374151; }
+        .highlight-tech { background-color: #DBEAFE; color: #1E40AF; padding: 0 4px; border-radius: 4px; font-weight: 500; }
+        .highlight-link { background-color: #FEF3C7; color: #92400E; padding: 0 4px; border-radius: 4px; font-weight: 500; }
+        
+        /* Custom Audio Player Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #2563EB;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #E5E7EB;
+            border-radius: 2px;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="bg-blue-600 p-2 rounded-lg text-white shadow-md">
+                    <i data-lucide="mic-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900 leading-tight">English Shadowing Lab</h1>
+                    <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Communicative Skills Practice</p>
+                </div>
+            </div>
+            
+            <!-- Audio Uploader -->
+            <div class="flex items-center gap-3 w-full sm:w-auto bg-gray-50 p-2 rounded-lg border border-gray-200">
+                <div class="text-xs text-gray-500 hidden md:block">Current Audio:</div>
+                <div class="flex-grow text-sm font-medium text-gray-700 truncate max-w-[150px]" id="file-name-display">Monologue to shadow.mp3</div>
+                <input type="file" id="audio-upload" accept="audio/*" class="hidden" onchange="handleFileUpload(this)">
+                <button onclick="document.getElementById('audio-upload').click()" class="text-xs bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md shadow-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="upload" class="w-3 h-3"></i> Change Audio
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-5xl mx-auto px-4 py-8 w-full">
+        
+        <!-- Navigation Tabs -->
+        <nav class="flex overflow-x-auto border-b border-gray-200 mb-6 gap-2 pb-1 hide-scrollbar">
+            <button onclick="switchTab(1)" id="tab-btn-1" class="tab-active whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-50">
+                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span> Familiarization
+            </button>
+            <button onclick="switchTab(2)" id="tab-btn-2" class="tab-inactive whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-50">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold">2</span> Slow Shadowing
+            </button>
+            <button onclick="switchTab(3)" id="tab-btn-3" class="tab-inactive whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-50">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold">3</span> Normal Speed
+            </button>
+            <button onclick="switchTab(4)" id="tab-btn-4" class="tab-inactive whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-50">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold">4</span> Adaptive
+            </button>
+            <button onclick="switchTab(5)" id="tab-btn-5" class="tab-inactive whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-50">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold">5</span> Simulation
+            </button>
+        </nav>
+
+        <!-- Audio Player Card (Sticky) -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-8 sticky top-24 z-10 transition-shadow hover:shadow-lg">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i data-lucide="music" class="w-4 h-4 text-blue-500"></i> Master Audio Control
+                </h3>
+                <span id="speed-display" class="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-1 rounded font-bold">1.0x</span>
+            </div>
+            
+            <audio id="main-audio" class="w-full hidden" preload="metadata">
+                <source src="Monologue to shadow.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+
+            <div class="flex items-center gap-4">
+                <button onclick="togglePlay()" id="play-btn" class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all shadow-lg hover:scale-105 active:scale-95">
+                    <i data-lucide="play" class="w-6 h-6 ml-1"></i>
+                </button>
+                
+                <div class="flex-grow space-y-1">
+                    <input type="range" id="seek-slider" max="100" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs font-medium text-gray-400">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speed Controls -->
+            <div class="flex justify-center gap-2 mt-4 pt-3 border-t border-gray-100">
+                <button onclick="setSpeed(0.5)" class="speed-btn px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition font-medium">0.5x</button>
+                <button onclick="setSpeed(0.75)" class="speed-btn px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition font-medium" id="speed-075">0.75x</button>
+                <button onclick="setSpeed(1)" class="speed-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-bold transition ring-1 ring-blue-200" id="speed-1">1.0x</button>
+                <button onclick="setSpeed(1.25)" class="speed-btn px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition font-medium">1.25x</button>
+            </div>
+        </div>
+
+        <!-- Section Content Area -->
+        <div id="content-area" class="min-h-[400px]">
+            <!-- Content injected via JS -->
+        </div>
+
+    </main>
+
+    <!-- REUSABLE RECORDER COMPONENT (Not visible, cloned by JS) -->
+    <template id="recorder-template">
+        <div class="mt-8 bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+                <i data-lucide="mic" class="w-4 h-4 text-red-500"></i> Your Practice Studio
+            </h3>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <button class="record-btn flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-medium transition-all shadow-md hover:shadow-lg active:scale-95 w-full sm:w-auto justify-center group">
+                    <div class="record-dot w-3 h-3 bg-white rounded-full transition-transform group-hover:scale-110"></div>
+                    <span class="record-text">Start Recording</span>
+                </button>
+                
+                <div class="recording-status hidden text-sm text-red-600 font-medium animate-pulse flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-600 rounded-full"></span> Recording... <span class="recording-timer font-mono">00:00</span>
+                </div>
+
+                <div class="audio-playback-container hidden flex-grow w-full flex items-center gap-4 animate-fade-in bg-white p-2 rounded-lg border border-gray-100 shadow-inner">
+                    <audio class="recorded-audio h-8 w-full" controls></audio>
+                    <a class="download-link p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 hover:bg-blue-50 rounded-full" title="Download Recording">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-3 text-center sm:text-left italic">
+                *Recordings are processed locally. Format is optimized for your browser (WebM or MP4).
+            </p>
+        </div>
+    </template>
+
+    <!-- CONTENT TEMPLATES -->
+
+    <!-- Day 1 -->
+    <template id="content-1">
+        <div class="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
+                <h2 class="text-2xl font-bold text-gray-900">Day 1: Familiarization</h2>
+                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold uppercase tracking-wide self-start md:self-auto">Understanding & Awareness</span>
+            </div>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                <h4 class="font-bold text-blue-900 text-sm mb-1">Situation</h4>
+                <p class="text-sm text-blue-800">Preparing to introduce yourself in a professional setting.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm h-full">
+                        <h4 class="font-bold text-gray-700 text-sm uppercase mb-4 border-b pb-2">Your Tasks</h4>
+                        <ul class="space-y-4 text-sm text-gray-600">
+                            <li class="flex items-start gap-3">
+                                <span class="bg-gray-100 p-1.5 rounded text-gray-500"><i data-lucide="headphones" class="w-4 h-4"></i></span>
+                                <span>Listen to the audio <strong>twice</strong> without speaking.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="bg-gray-100 p-1.5 rounded text-gray-500"><i data-lucide="eye" class="w-4 h-4"></i></span>
+                                <span>On the 3rd listen, <strong>read the transcript silently</strong>.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="bg-gray-100 p-1.5 rounded text-gray-500"><i data-lucide="highlighter" class="w-4 h-4"></i></span>
+                                <span>Notice the <span class="highlight-tech">technical terms</span> and <span class="highlight-link">linking phrases</span>.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 font-serif leading-relaxed text-lg text-gray-800 relative">
+                    <div class="absolute -top-3 left-4 bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">Transcript</div>
+                    <div class="space-y-4">
+                        <p>
+                            "I work in a role that is closely connected to technology, with a strong focus on <span class="highlight-tech">database concepts</span> and Microsoft-based tools.
+                        </p>
+                        <p>
+                            <span class="highlight-link">On a daily basis</span>, I manage and analyze data to support different projects. These tools are essential in my <span class="highlight-tech">workflow</span>, as they allow me to structure information, maintain data accuracy, and provide reliable <span class="highlight-tech">insights</span> for decision-making.
+                        </p>
+                        <p>
+                            I collaborate frequently with project management teams. <span class="highlight-link">While they</span> are responsible for planning, timelines, and overall coordination, my <span class="highlight-tech">responsibility</span> is to contribute from a technical perspective. I help ensure that the technological and database-related aspects of each project are aligned with its objectives.
+                        </p>
+                        <p>
+                            A key part of my role involves communication. I often need to translate technical concepts into clear, practical language so that non-technical stakeholders can understand the implications and make informed decisions.
+                        </p>
+                        <p>
+                            <span class="highlight-link">Ultimately</span>, my work is about bridging the gap between technology and project execution. By combining database knowledge with collaboration and problem-solving, I help projects move forward efficiently and with technical reliability."
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-100 pt-6 mt-6">
+                <h4 class="font-bold text-gray-700 mb-3 text-sm">Today's Goals:</h4>
+                <div class="flex flex-wrap gap-3 text-sm text-gray-600">
+                    <span class="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-100"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Understand meaning, rhythm, structure</span>
+                    <span class="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-100"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Notice idea organization</span>
+                </div>
+            </div>
+            
+            <!-- Recorder Container Placeholder -->
+            <div class="recorder-container"></div>
+        </div>
+    </template>
+
+    <!-- Day 2 -->
+    <template id="content-2">
+        <div class="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
+                <h2 class="text-2xl font-bold text-gray-900">Day 2: Slow Shadowing</h2>
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wide self-start md:self-auto">Accuracy First</span>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
+                <h4 class="font-bold text-yellow-900 text-sm mb-1">Situation</h4>
+                <p class="text-sm text-yellow-800">Explaining your role to a colleague from another department.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-5 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="list-checks" class="w-5 h-5 text-yellow-500"></i> Steps</h3>
+                    <ol class="space-y-3 text-sm text-gray-600">
+                        <li class="flex gap-3">
+                            <span class="font-bold text-yellow-600">1.</span>
+                            <span>Set the audio player above to <strong class="text-blue-600 bg-blue-50 px-1 rounded">0.75x</strong> speed.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="font-bold text-yellow-600">2.</span>
+                            <span>Shadow the speaker, staying <strong>slightly behind</strong> (like an echo).</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="font-bold text-yellow-600">3.</span>
+                            <span>Focus on <strong class="text-gray-900">sentence stress</strong> and <strong class="text-gray-900">clear consonants</strong>.</span>
+                        </li>
+                    </ol>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-sm text-yellow-800 italic">
+                            <strong class="font-bold">💡 Teacher's Tip:</strong> Don’t worry about speed — clarity comes first.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center hover:border-blue-300 transition-colors group">
+                        <span class="block text-2xl mb-2 group-hover:scale-110 transition-transform">🏗️</span>
+                        <span class="font-bold text-gray-800 block">Structure</span>
+                        <p class="text-xs text-gray-500 mt-1 font-mono text-blue-600">"STRUC-ture"</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center hover:border-blue-300 transition-colors group">
+                        <span class="block text-2xl mb-2 group-hover:scale-110 transition-transform">📊</span>
+                        <span class="font-bold text-gray-800 block">Projects</span>
+                        <p class="text-xs text-gray-500 mt-1 font-mono text-blue-600">"PRO-jects"</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center hover:border-blue-300 transition-colors group">
+                        <span class="block text-2xl mb-2 group-hover:scale-110 transition-transform">🤝</span>
+                        <span class="font-bold text-gray-800 block">Responsibility</span>
+                        <p class="text-xs text-gray-500 mt-1 font-mono text-blue-600">"re-spon-si-BI-li-ty"</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-wrap gap-3 text-sm text-gray-600 justify-center">
+                 <span class="flex items-center gap-2 bg-yellow-50 text-yellow-800 px-3 py-1 rounded-full border border-yellow-100"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Improve pronunciation</span>
+                 <span class="flex items-center gap-2 bg-yellow-50 text-yellow-800 px-3 py-1 rounded-full border border-yellow-100"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Reduce native rhythm interference</span>
+            </div>
+
+            <!-- Recorder Container Placeholder -->
+            <div class="recorder-container"></div>
+        </div>
+    </template>
+
+    <!-- Day 3 -->
+    <template id="content-3">
+        <div class="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
+                <h2 class="text-2xl font-bold text-gray-900">Day 3: Normal Speed Shadowing</h2>
+                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold uppercase tracking-wide self-start md:self-auto">Fluency</span>
+            </div>
+
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6 rounded-r-lg">
+                <h4 class="font-bold text-purple-900 text-sm mb-1">Situation</h4>
+                <p class="text-sm text-purple-800">Participating in a project update meeting.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-gray-700 mb-3 border-b pb-2">The Routine</h4>
+                        <ul class="space-y-4 text-sm text-gray-600">
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-bold border border-gray-200">1</span>
+                                <span>Set speed to <strong class="text-blue-600">1.0x (Normal)</strong>.</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-bold border border-gray-200">2</span>
+                                <span>Do <strong>two full repetitions</strong>.</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm font-bold border border-red-200 animate-pulse">3</span>
+                                <span><strong>Record yourself</strong> on the last one using the studio below.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg border border-purple-200 shadow-sm">
+                    <h4 class="font-bold text-purple-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> Self-Reflection
+                    </h4>
+                    <p class="text-sm text-gray-500 mb-4">After recording, listen back and ask yourself:</p>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer hover:bg-purple-50 p-2 rounded transition-colors">
+                            <input type="checkbox" class="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 border-gray-300"> 
+                            <span>Do I sound confident?</span>
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer hover:bg-purple-50 p-2 rounded transition-colors">
+                            <input type="checkbox" class="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 border-gray-300"> 
+                            <span>Are my pauses natural?</span>
+                        </label>
+                        <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer hover:bg-purple-50 p-2 rounded transition-colors">
+                            <input type="checkbox" class="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 border-gray-300"> 
+                            <span>Did I rush technical words?</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 border-t border-gray-100 pt-4 flex flex-wrap gap-3 text-sm text-gray-600">
+                <span class="flex items-center gap-2 text-purple-700 font-medium"><i data-lucide="target" class="w-4 h-4"></i> Goals:</span>
+                <span class="flex items-center gap-1">✔ Build flow</span>
+                <span class="flex items-center gap-1">✔ Sound natural, not mechanical</span>
+           </div>
+
+           <!-- Recorder Container Placeholder -->
+           <div class="recorder-container"></div>
+        </div>
+    </template>
+
+    <!-- Day 4 -->
+    <template id="content-4">
+        <div class="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
+                <h2 class="text-2xl font-bold text-gray-900">Day 4: Adaptive Shadowing</h2>
+                <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-bold uppercase tracking-wide self-start md:self-auto">Real Interaction</span>
+            </div>
+
+            <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6 rounded-r-lg">
+                <h4 class="font-bold text-orange-900 text-sm mb-1">Situation</h4>
+                <p class="text-sm text-orange-800">Responding to a manager or stakeholder’s question.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div>
+                     <h4 class="font-bold text-gray-800 mb-4">Steps</h4>
+                     <ul class="space-y-4">
+                         <li class="flex gap-3">
+                             <div class="mt-0.5"><i data-lucide="pause-circle" class="w-5 h-5 text-orange-500"></i></div>
+                             <p class="text-sm text-gray-600">Play the audio, but hit <strong>Pause</strong> after each paragraph.</p>
+                         </li>
+                         <li class="flex gap-3">
+                             <div class="mt-0.5"><i data-lucide="mic-2" class="w-5 h-5 text-orange-500"></i></div>
+                             <p class="text-sm text-gray-600"><strong>Paraphrase out loud</strong> using your own words but keeping the same ideas.</p>
+                         </li>
+                         <li class="flex gap-3">
+                             <div class="mt-0.5"><i data-lucide="repeat" class="w-5 h-5 text-orange-500"></i></div>
+                             <p class="text-sm text-gray-600">Then, shadow the original audio again to compare flow.</p>
+                         </li>
+                     </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                        <h4 class="font-bold text-gray-700 text-sm">Example Task</h4>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200 opacity-75">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Original Audio</span>
+                            <p class="text-sm text-gray-800 italic">"I collaborate frequently with project management teams..."</p>
+                        </div>
+                        <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-gray-300"></i></div>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Your Adaptation</span>
+                            <p class="text-sm text-blue-900 font-medium">"I usually work alongside project managers to make sure the technical side supports the project goals."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-4 text-sm text-gray-600">
+                <span class="flex items-center gap-2 text-orange-700 font-medium"><i data-lucide="target" class="w-4 h-4"></i> Goals:</span>
+                <span>Transfer memorized language to spontaneous speech</span>
+                <span class="hidden sm:inline">•</span>
+                <span>Build flexibility</span>
+            </div>
+
+            <!-- Recorder Container Placeholder -->
+            <div class="recorder-container"></div>
+        </div>
+    </template>
+
+    <!-- Day 5 -->
+    <template id="content-5">
+        <div class="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2">
+                <h2 class="text-2xl font-bold text-gray-900">Day 5: Performance Simulation</h2>
+                <span class="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-xs font-bold uppercase tracking-wide self-start md:self-auto">Confidence & Ownership</span>
+            </div>
+
+            <div class="bg-rose-50 border-l-4 border-rose-400 p-4 mb-6 rounded-r-lg">
+                <h4 class="font-bold text-rose-900 text-sm mb-1">Situation</h4>
+                <p class="text-sm text-rose-800">Introducing yourself in a meeting or interview.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="relative rounded-xl overflow-hidden shadow-lg group h-64 md:h-auto">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" alt="Meeting" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
+                        <h3 class="text-white font-bold text-xl mb-1">Final Challenge</h3>
+                        <p class="text-gray-200 text-sm">Say it standing up, as if you were in a real meeting.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm h-full flex flex-col justify-center">
+                        <h4 class="font-bold text-gray-800 mb-4 border-b pb-2">Steps to Mastery</h4>
+                        <ol class="space-y-4 text-sm text-gray-600">
+                            <li class="flex gap-3">
+                                <span class="font-bold text-rose-500">1.</span>
+                                <span><strong>Do not play the audio.</strong> Rely on memory.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-rose-500">2.</span>
+                                <span><strong>Record</strong> yourself speaking the monologue.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-rose-500">3.</span>
+                                <span>Listen and compare: <strong>Clarity, Confidence, Tone</strong>.</span>
+                            </li>
+                        </ol>
+                        <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                            <p class="italic text-gray-500 text-xs">"The goal isn't just to say the words correctly, but to believe them when you say them."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-4 text-sm text-gray-600">
+                <span class="flex items-center gap-2 text-rose-700 font-medium"><i data-lucide="target" class="w-4 h-4"></i> Goals:</span>
+                <span>Own the language</span>
+                <span class="hidden sm:inline">•</span>
+                <span>Speak without relying on the script</span>
+            </div>
+
+            <!-- Recorder Container Placeholder -->
+            <div class="recorder-container"></div>
+        </div>
+    </template>
+
+    <script>
+        // --- State ---
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordingInterval = null;
+        let recordingTime = 0;
+        let activeRecorderElements = null; // Stores refs to current tab's recorder DOM elements
+
+        // --- Helper for Icons ---
+        function safeCreateIcons() {
+            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+        }
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab(1);
+            
+            // Safety check: sometimes scripts load async. If lucide isn't ready, wait for it.
+            if (typeof lucide === 'undefined') {
+                const checkLucide = setInterval(() => {
+                    if (typeof lucide !== 'undefined') {
+                        safeCreateIcons();
+                        clearInterval(checkLucide);
+                    }
+                }, 100);
+                // Stop checking after 3 seconds to avoid infinite loop
+                setTimeout(() => clearInterval(checkLucide), 3000);
+            }
+        });
+
+        // --- File Upload Logic ---
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                const audio = document.getElementById('main-audio');
+                const nameDisplay = document.getElementById('file-name-display');
+                
+                audio.src = url;
+                nameDisplay.textContent = file.name;
+                
+                // Reset player UI
+                document.getElementById('play-btn').innerHTML = '<i data-lucide="play" class="w-6 h-6 ml-1"></i>';
+                document.getElementById('seek-slider').value = 0;
+                document.getElementById('current-time').textContent = '0:00';
+                safeCreateIcons();
+            }
+        }
+
+        // --- Tab Logic ---
+        const contentArea = document.getElementById('content-area');
+        const recorderTemplate = document.getElementById('recorder-template');
+
+        function switchTab(day) {
+            // STOP active recording if switching tabs to prevent bugs
+            if(isRecording) {
+               toggleRecording(); // Clean stop
+            }
+
+            // Update Tab Styles
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`tab-btn-${i}`);
+                if (i === day) {
+                    btn.className = "tab-active whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg bg-white border border-b-0 border-gray-200 z-10 -mb-[1px]";
+                    btn.querySelector('span').className = "w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold";
+                } else {
+                    btn.className = "tab-inactive whitespace-nowrap px-4 py-3 text-sm transition-colors flex items-center gap-2 rounded-t-lg hover:bg-gray-100 border-b border-gray-200";
+                    btn.querySelector('span').className = "w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold";
+                }
+            }
+
+            // Inject Content
+            const template = document.getElementById(`content-${day}`);
+            contentArea.innerHTML = template.innerHTML;
+
+            // Inject Recorder into the specific container for this tab
+            const container = contentArea.querySelector('.recorder-container');
+            if(container) {
+                const recorderClone = recorderTemplate.content.cloneNode(true);
+                container.appendChild(recorderClone);
+                setupRecorderEvents(container);
+            }
+
+            // Initialize Icons safely
+            safeCreateIcons();
+
+            // Auto-adjust speed suggestion based on Day
+            if(day === 2) {
+                setSpeed(0.75);
+            } else {
+                setSpeed(1.0);
+            }
+        }
+
+        // --- Audio Logic ---
+        const audio = document.getElementById('main-audio');
+        const playBtn = document.getElementById('play-btn');
+        const seekSlider = document.getElementById('seek-slider');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const speedDisplay = document.getElementById('speed-display');
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play().catch(e => alert("Audio file not found. Please ensure 'Monologue to shadow.mp3' is in the same folder as this HTML file, or upload a new one using the button."));
+                playBtn.innerHTML = '<i data-lucide="pause" class="w-6 h-6 ml-0"></i>';
+                playBtn.classList.add('bg-blue-700');
+            } else {
+                audio.pause();
+                playBtn.innerHTML = '<i data-lucide="play" class="w-6 h-6 ml-1"></i>';
+                playBtn.classList.remove('bg-blue-700');
+            }
+            safeCreateIcons();
+        }
+
+        function setSpeed(speed) {
+            audio.playbackRate = speed;
+            speedDisplay.textContent = `${speed}x`;
+            
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                if(parseFloat(btn.innerText) === speed) {
+                    btn.className = "speed-btn px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-bold transition ring-1 ring-blue-200";
+                } else {
+                    btn.className = "speed-btn px-3 py-1 text-xs rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition font-medium";
+                }
+            });
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if(audio.duration) {
+                const val = (audio.currentTime / audio.duration) * 100;
+                seekSlider.value = val || 0;
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+            }
+        });
+
+        seekSlider.addEventListener('input', () => {
+            if(audio.duration) {
+                const time = (seekSlider.value / 100) * audio.duration;
+                audio.currentTime = time;
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => {
+             playBtn.innerHTML = '<i data-lucide="play" class="w-6 h-6 ml-1"></i>';
+             safeCreateIcons();
+        });
+
+        // --- Recorder Logic ---
+        function setupRecorderEvents(container) {
+            const btn = container.querySelector('.record-btn');
+            
+            // Cache elements for the current active recorder
+            activeRecorderElements = {
+                btn: btn,
+                text: container.querySelector('.record-text'),
+                dot: container.querySelector('.record-dot'),
+                status: container.querySelector('.recording-status'),
+                timer: container.querySelector('.recording-timer'),
+                playback: container.querySelector('.audio-playback-container'),
+                audio: container.querySelector('.recorded-audio'),
+                download: container.querySelector('.download-link')
+            };
+
+            btn.onclick = toggleRecording;
+        }
+
+        async function toggleRecording() {
+            if (!activeRecorderElements) return;
+            const els = activeRecorderElements;
+
+            if (!isRecording) {
+                // START RECORDING
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    
+                    // Robust MIME type selection
+                    let options = undefined;
+                    // Check standard types without forcing unless needed
+                    if (MediaRecorder.isTypeSupported('audio/webm')) {
+                        options = { mimeType: 'audio/webm' };
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options = { mimeType: 'audio/mp4' };
+                    }
+                    
+                    // Create recorder with fallback
+                    try {
+                        mediaRecorder = new MediaRecorder(stream, options);
+                    } catch (e) {
+                        // Fallback: let browser choose default if specific options fail
+                        console.warn("Custom mimeType failed, falling back to default");
+                        mediaRecorder = new MediaRecorder(stream);
+                    }
+
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        // Create Blob
+                        // Default to webm if mimeType is empty (common in some browsers)
+                        const type = mediaRecorder.mimeType || 'audio/webm';
+                        const blob = new Blob(audioChunks, { type: type });
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Determine extension based on actual type
+                        let ext = 'webm';
+                        if (type.includes('mp4') || type.includes('aac')) ext = 'mp4';
+                        else if (type.includes('ogg')) ext = 'ogg';
+                        else if (type.includes('wav')) ext = 'wav';
+                        
+                        // Update UI
+                        els.audio.src = url;
+                        els.download.href = url;
+                        els.download.download = `shadowing-practice-${new Date().getTime()}.${ext}`;
+                        els.playback.classList.remove('hidden');
+                        
+                        // UI Reset
+                        els.btn.classList.replace('bg-gray-800', 'bg-red-500');
+                        els.btn.classList.replace('hover:bg-gray-900', 'hover:bg-red-600');
+                        els.text.textContent = "Start Recording";
+                        els.dot.classList.remove('animate-pulse', 'bg-red-500');
+                        els.dot.classList.add('bg-white');
+                        els.status.classList.add('hidden');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    // UI Updates for Active Recording
+                    els.playback.classList.add('hidden');
+                    els.btn.classList.replace('bg-red-500', 'bg-gray-800');
+                    els.btn.classList.replace('hover:bg-red-600', 'hover:bg-gray-900');
+                    els.text.textContent = "Stop Recording";
+                    els.dot.classList.remove('bg-white');
+                    els.dot.classList.add('animate-pulse', 'bg-red-500');
+                    els.status.classList.remove('hidden');
+
+                    // Timer
+                    recordingTime = 0;
+                    els.timer.textContent = "00:00";
+                    clearInterval(recordingInterval); // clear any existing
+                    recordingInterval = setInterval(() => {
+                        recordingTime++;
+                        els.timer.textContent = formatTime(recordingTime);
+                    }, 1000);
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Could not start recording. Please ensure microphone permissions are allowed.");
+                }
+            } else {
+                // STOP RECORDING
+                if(mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                clearInterval(recordingInterval);
+            }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+    </script>
+</body>
+</html>
